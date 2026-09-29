@@ -14,6 +14,9 @@ StandardOutput=append:/var/log/prediction-system/api.log
 StandardError=append:/var/log/prediction-system/api.log
 Environment=PYTHONUNBUFFERED=1
 Environment=PYTHONPATH=/home/chain-deaction/local_prediction/predition-app/prediction
+EnvironmentFile=-/home/chain-deaction/local_prediction/predition-app/.env
+MemoryMax=2G
+CPUQuota=200%
 
 [Install]
 WantedBy=multi-user.target

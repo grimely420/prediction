@@ -6,6 +6,7 @@ Model management: training, loading, and retraining for each coin/horizon.
 import os
 import json
 import time
+import shutil
 import joblib
 import numpy as np
 from datetime import datetime, timezone
@@ -111,6 +112,38 @@ class ModelManager:
     def _model_path(self, horizon: int) -> str:
         return os.path.join(self.model_dir, f"xgb_{horizon}min_latest.pkl")
 
+    def _save_artifact(self, path: str, payload,
+                     acc_metric: Optional[float] = None) -> None:
+        """Save a model artifact, preserving the previous one for rollback.
+
+        The outgoing *_latest.pkl is copied to *_prev.pkl before overwrite so
+        a bad retrain never destroys the last known-good model. If the prior
+        artifact carries metrics and val_acc regresses by >3 pts, a warning is
+        logged (the new model is still promoted — regime drift can legitimately
+        lower validation accuracy, but the warning makes it visible).
+        """
+        prev_path = path.replace('_latest.pkl', '_prev.pkl')
+        prev_acc = None
+        if os.path.exists(path):
+            try:
+                old = joblib.load(path)
+                tup = old if isinstance(old, tuple) else (old,)
+                for obj in tup:
+                    if isinstance(obj, dict) and obj.get('val_acc') is not None:
+                        prev_acc = float(obj['val_acc'])
+            except Exception:
+                pass
+            try:
+                shutil.copy2(path, prev_path)
+            except Exception as e:
+                logger.warning(f"[{self.symbol}] prev snapshot failed: {e}")
+        joblib.dump(payload, path)
+        if acc_metric is not None and prev_acc is not None \
+                and acc_metric < prev_acc - 0.03:
+            logger.warning(
+                f"[{self.symbol}] val_acc regressed {prev_acc:.3f} -> "
+                f"{acc_metric:.3f}; rollback copy at {prev_path}")
+
     def _counts_path(self) -> str:
         return os.path.join(self.model_dir, ".last_train_counts.json")
 
@@ -170,7 +203,7 @@ class ModelManager:
         try:
             model, metrics = self.fit_model(X, y)
             path = self._model_path(horizon)
-            joblib.dump((model, feature_names), path)
+            self._save_artifact(path, (model, feature_names))
 
             self.models[horizon] = {
                 'model': model,
@@ -221,7 +254,8 @@ class ModelManager:
                 fee_pct=getattr(self.cfg, 'fee_pct', 0.05)
             )
             path = self._clf_path(horizon)
-            joblib.dump((model, feature_names, le), path)
+            self._save_artifact(path, (model, feature_names, le),
+                                acc_metric=metrics.get('val_acc'))
 
             self.classifiers[horizon] = {
                 'model': model,
@@ -558,7 +592,8 @@ class ModelManager:
             )
             metrics['n_samples'] = len(X)
             path = self._contract_path()
-            joblib.dump((model, feature_names, le, metrics), path)
+            self._save_artifact(path, (model, feature_names, le, metrics),
+                                acc_metric=metrics.get('val_acc'))
 
             self.contract_model = {
                 'model': model,

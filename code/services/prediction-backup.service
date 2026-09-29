@@ -1,0 +1,14 @@
+[Unit]
+Description=Prediction system nightly backup
+After=network.target
+
+[Service]
+Type=oneshot
+User=chain-deaction
+Group=chain-deaction
+ExecStart=/bin/bash /home/chain-deaction/local_prediction/predition-app/prediction/scripts/backup.sh
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

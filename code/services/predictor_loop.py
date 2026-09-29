@@ -56,6 +56,7 @@ class PredictorLoop:
         self.predictor = Predictor(self.cfg, self.ds, self.fe, self.mm)
         self.validator = Validator(self.cfg, self.ds)
         self.running = True
+        self._last_prune = 0.0
         self._setup_signals()
 
     def _setup_signals(self):
@@ -78,6 +79,20 @@ class PredictorLoop:
                 logger.error(f"[{self.cfg.symbol}:{h}m] Prediction failed: {e}")
         self.predictor.maybe_log_contract_signal()
         self._log_news()
+        self._maybe_prune()
+
+    def _maybe_prune(self):
+        """Daily retention sweep + weekly VACUUM (bounded via _last_prune)."""
+        now = time.time()
+        if now - self._last_prune < 86400.0:
+            return
+        self._last_prune = now
+        try:
+            self.ds.prune_old_data()
+            if datetime.now(timezone.utc).weekday() == 0:  # Mondays only
+                self.ds.vacuum()
+        except Exception as e:
+            logger.warning(f"[{self.cfg.symbol}] prune failed: {e}")
 
     def _log_news(self):
         """Persist news-engine features so training frames can join them by

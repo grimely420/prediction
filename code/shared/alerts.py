@@ -80,7 +80,10 @@ def send_telegram(message: str, disable_notification: bool = False) -> bool:
         r.raise_for_status()
         return True
     except Exception as e:
-        logger.error(f"Telegram send failed: {e}")
+        # requests exceptions embed the full URL including the bot token —
+        # redact it before writing to logs.
+        logger.error("Telegram send failed: %s",
+                     str(e).replace(token, "<token>") if token else e)
         return False
 
 

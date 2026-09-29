@@ -863,4 +863,9 @@ def create_app() -> Flask:
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(host='0.0.0.0', port=5000, threaded=True)
+    try:
+        from waitress import serve
+        serve(app, host='0.0.0.0', port=5000, threads=8,
+              channel_timeout=120, cleanup_interval=30)
+    except ImportError:
+        app.run(host='0.0.0.0', port=5000, threaded=True)

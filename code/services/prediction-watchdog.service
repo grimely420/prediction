@@ -1,0 +1,12 @@
+[Unit]
+Description=Prediction system watchdog (hung-service detector)
+After=network.target prediction-api.service
+
+[Service]
+Type=oneshot
+ExecStart=/home/chain-deaction/local_prediction/predition-app/prediction/.venv/bin/python /home/chain-deaction/local_prediction/predition-app/prediction/scripts/watchdog.py
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

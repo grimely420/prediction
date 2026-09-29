@@ -227,6 +227,53 @@ class DataStore:
             logger.error(f"[{self.symbol}] log_news_features error: {e}")
             return False
 
+    def prune_old_data(self, price_keep_days: int = 70,
+                       news_keep_days: int = 70,
+                       prediction_keep_days: int = 365) -> Dict[str, int]:
+        """Delete rows older than the retention windows.
+
+        Training only looks back 60 days, so raw ticks/news older than 70
+        days are dead weight (the DBs grow ~7 MB/day/coin otherwise).
+        contract_signals are kept indefinitely — they are the edge ledger.
+        """
+        deleted = {'prices': 0, 'news_features': 0, 'predictions': 0}
+        price_cut = (datetime.now(timezone.utc)
+                     - timedelta(days=price_keep_days)).isoformat()
+        news_cut = (datetime.now(timezone.utc)
+                    - timedelta(days=news_keep_days)).isoformat()
+        pred_cut = (datetime.now(timezone.utc)
+                    - timedelta(days=prediction_keep_days)).isoformat()
+        try:
+            conn = self._conn()
+            cur = conn.cursor()
+            for table, col, cut, key in (
+                ('prices', 'timestamp', price_cut, 'prices'),
+                ('news_features', 'timestamp', news_cut, 'news_features'),
+                ('predictions', 'prediction_time', pred_cut, 'predictions'),
+            ):
+                try:
+                    cur.execute(f"DELETE FROM {table} WHERE {col} < ?", (cut,))
+                    deleted[key] = cur.rowcount
+                except sqlite3.OperationalError:
+                    pass
+            conn.commit()
+            conn.close()
+            if any(deleted.values()):
+                logger.info(f"[{self.symbol}] pruned {deleted}")
+        except Exception as e:
+            logger.error(f"[{self.symbol}] prune error: {e}")
+        return deleted
+
+    def vacuum(self) -> None:
+        """Reclaim disk space after pruning (weekly cadence)."""
+        try:
+            conn = self._conn()
+            conn.execute("VACUUM")
+            conn.close()
+            logger.info(f"[{self.symbol}] VACUUM complete")
+        except Exception as e:
+            logger.error(f"[{self.symbol}] vacuum error: {e}")
+
     def get_news_features(self, limit: int = 60000) -> List[Dict[str, Any]]:
         """Return news-feature rows ascending by time (newest `limit` rows)."""
         try:
