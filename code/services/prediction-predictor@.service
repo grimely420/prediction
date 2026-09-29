@@ -1,0 +1,20 @@
+[Unit]
+Description=Cryptocurrency Prediction System - %i Predictor Loop
+After=network.target prediction-collector@%i.service
+Wants=prediction-collector@%i.service
+
+[Service]
+Type=simple
+User=chain-deaction
+Group=chain-deaction
+WorkingDirectory=/home/chain-deaction/local_prediction/predition-app/prediction
+ExecStart=/home/chain-deaction/local_prediction/predition-app/prediction/.venv/bin/python -m services.predictor_loop %i
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/prediction-system/%i-predictor-loop.log
+StandardError=append:/var/log/prediction-system/%i-predictor-loop.log
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/home/chain-deaction/local_prediction/predition-app/prediction
+
+[Install]
+WantedBy=multi-user.target

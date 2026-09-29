@@ -1,0 +1,19 @@
+[Unit]
+Description=Bitcoin Prediction Generator (15min intervals)
+After=network.target bitcoin-api.service
+Requires=bitcoin-api.service
+
+[Service]
+Type=simple
+User=chain-deaction
+WorkingDirectory=/home/chain-deaction/prediction
+Environment=PYTHONPATH=/home/chain-deaction/prediction
+Environment=PATH=/home/chain-deaction/prediction/.venv/bin:$PATH
+ExecStart=/home/chain-deaction/prediction/.venv/bin/python bitcoin/generate_predictions.py
+Restart=always
+RestartSec=30
+StandardOutput=append:/var/log/prediction-system/btc-generator.log
+StandardError=append:/var/log/prediction-system/btc-generator.log
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,19 @@
+[Unit]
+Description=Bitcoin Prediction API
+After=network.target bitcoin-collector.service
+Requires=bitcoin-collector.service
+
+[Service]
+Type=simple
+User=chain-deaction
+WorkingDirectory=/home/chain-deaction/prediction
+Environment=PYTHONPATH=/home/chain-deaction/prediction
+Environment=PATH=/home/chain-deaction/prediction/.venv/bin:$PATH
+ExecStart=/home/chain-deaction/prediction/.venv/bin/python bitcoin/api.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/prediction-system/btc-api.log
+StandardError=append:/var/log/prediction-system/btc-api.log
+
+[Install]
+WantedBy=multi-user.target

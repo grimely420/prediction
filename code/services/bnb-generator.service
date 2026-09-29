@@ -1,0 +1,19 @@
+[Unit]
+Description=BNB Prediction Generator (5min intervals)
+After=network.target bnb-api.service
+Requires=bnb-api.service
+
+[Service]
+Type=simple
+User=chain-deaction
+WorkingDirectory=/home/chain-deaction/prediction
+Environment=PYTHONPATH=/home/chain-deaction/prediction
+Environment=PATH=/home/chain-deaction/prediction/.venv/bin:$PATH
+ExecStart=/home/chain-deaction/prediction/.venv/bin/python bnb/generate_predictions.py
+Restart=always
+RestartSec=30
+StandardOutput=append:/var/log/prediction-system/bnb-generator.log
+StandardError=append:/var/log/prediction-system/bnb-generator.log
+
+[Install]
+WantedBy=multi-user.target

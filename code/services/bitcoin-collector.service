@@ -1,0 +1,18 @@
+[Unit]
+Description=Bitcoin Price Collector
+After=network.target
+
+[Service]
+Type=simple
+User=chain-deaction
+WorkingDirectory=/home/chain-deaction/prediction
+Environment=PYTHONPATH=/home/chain-deaction/prediction
+Environment=PATH=/home/chain-deaction/prediction/.venv/bin:$PATH
+ExecStart=/home/chain-deaction/prediction/.venv/bin/python bitcoin/collector.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/prediction-system/btc-collector.log
+StandardError=append:/var/log/prediction-system/btc-collector.log
+
+[Install]
+WantedBy=multi-user.target

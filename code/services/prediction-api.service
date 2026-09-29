@@ -1,0 +1,19 @@
+[Unit]
+Description=Cryptocurrency Prediction System - Unified API
+After=network.target
+
+[Service]
+Type=simple
+User=chain-deaction
+Group=chain-deaction
+WorkingDirectory=/home/chain-deaction/local_prediction/predition-app/prediction
+ExecStart=/home/chain-deaction/local_prediction/predition-app/prediction/.venv/bin/python -m shared.api
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/prediction-system/api.log
+StandardError=append:/var/log/prediction-system/api.log
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/home/chain-deaction/local_prediction/predition-app/prediction
+
+[Install]
+WantedBy=multi-user.target

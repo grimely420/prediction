@@ -1,0 +1,59 @@
+===== UPTIME / BOOT =====
+ 10:17:01 up 5 min,  2 users,  load average: 0.70, 0.71, 0.32
+
+===== TEMPERATURES =====
+acpitz: 27°C
+acpitz: 29°C
+x86_pkg_temp: 36°C
+acpitz temp1_input: 27°C
+acpitz temp2_input: 29°C
+coretemp Core 0: 34°C
+coretemp Core 1: 34°C
+coretemp Core 2: 34°C
+coretemp Core 3: 35°C
+coretemp Package id 0: 36°C
+
+===== CPU THROTTLE / FREQ =====
+cpu MHz		: 2800.010
+cpu MHz		: 2800.018
+cpu MHz		: 2800.020
+
+===== DISK SMART =====
+--- /dev/sda ---
+(smartctl unavailable or needs sudo)
+
+===== NVME ERROR LOG =====
+
+===== DMESG ERRORS (last boot) =====
+
+===== RECENT KERNEL HW EVENTS =====
+
+===== MEMORY =====
+               total        used        free      shared  buff/cache   available
+Mem:            14Gi       2.1Gi        10Gi       170Mi       2.4Gi        12Gi
+Swap:          4.0Gi          0B       4.0Gi
+
+===== DISK FS =====
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda2       937G   72G  818G   9% /
+/dev/sda2       937G   72G  818G   9% /
+
+===== FAILED SERVICES =====
+● home-chain\x2ddeaction-oldfiles.mount loaded failed failed /home/chain-deaction/oldfiles
+
+===== PREDICTION SERVICES =====
+active
+active
+active
+active
+active
+active
+active
+
+===== JOURNAL ERRORS SINCE BOOT =====
+Sep 27 10:11:53 deaction-server.marks.local kernel: x86/cpu: SGX disabled or unsupported by BIOS.
+Sep 27 10:11:53 deaction-server.marks.local kernel: tpm_tis MSFT0101:00: probe with driver tpm_tis failed with error -1
+Sep 27 10:13:27 deaction-server.marks.local systemd[1]: Timed out waiting for device dev-tpm0.device - /dev/tpm0.
+Sep 27 10:13:27 deaction-server.marks.local systemd[1]: Timed out waiting for device dev-tpmrm0.device - /dev/tpmrm0.
+Sep 27 10:15:04 deaction-server.marks.local systemd[1]: Failed to mount home-chain\x2ddeaction-oldfiles.mount - /home/chain-deaction/oldfiles.
+Sep 27 10:15:04 deaction-server.marks.local gdm-autologin][2439]: gkr-pam: couldn't unlock the login keyring.
